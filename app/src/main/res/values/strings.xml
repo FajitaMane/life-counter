@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MagicLifeCounter</string>
+
+    <string name="player_1">Player 1</string>
+    <string name="player_2">Player 2</string>
+    <string name="player_1_life">20</string>
+    <string name="five">5</string>
+    <string name="one">1</string>
+</resources>

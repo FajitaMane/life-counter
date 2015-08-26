@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="player_text" parent="android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="player_life" parent="android:style/TextAppearance.Large">
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">82dip</item>
+    </style>
+
+    <style name="life_incrementer" parent="android:style/TextAppearance.Large">
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">64dip</item>
+        <item name="android:layout_marginRight">10dip</item>
+    </style>
+
+</resources>
