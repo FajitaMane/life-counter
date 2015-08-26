@@ -1,13 +1,19 @@
 package net.john.magiclifecounter;
 
+import android.content.Context;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -17,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private final int STARTING_LIFE = 20;
     private int player_count = 2;
     private int[] player_life = new int[2];
+    private RelativeLayout main_layout;
     private TextView player_1_life;
     private TextView player_2_life;
     private Player[] player_array;
@@ -33,11 +40,33 @@ public class MainActivity extends AppCompatActivity {
     private int[] player_1_id_array = new int[4];
     private int[] player_2_id_array = new int[4];
 
+    //wakelock keeps the scree on
+    protected PowerManager.WakeLock mWakeLock;
+
+    //milliseconds between commands to merge similar moves
+    private final long MERGE_MILLIS = 3 * 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+        back_button = (ImageView) findViewById(R.id.back_button);
+        forward_button = (ImageView) findViewById(R.id.forward_button);
+
+        //set the wake lock
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "MagicLifeCounter");
+        mWakeLock.acquire();
+
+        Display mDisplay = getWindowManager().getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        mDisplay.getMetrics(metrics);
+        float dpHeight = metrics.heightPixels / metrics.density;
+        int[] p = new int[2];
+        main_layout.getLocationOnScreen(p);
+        float remaining_dp_space = dpHeight - p[1] - main_layout.getHeight();
+
         for (int i = 0; i < player_life.length; i++){
             player_life[i] = 20; //set all players' life to 20
         }
@@ -50,10 +79,16 @@ public class MainActivity extends AppCompatActivity {
         player_array[0] = Player.PLAYER_ONE;
         player_array[1] = Player.PLAYER_TWO;
 
-        back_button = (ImageView) findViewById(R.id.back_button);
-        forward_button = (ImageView) findViewById(R.id.forward_button);
+
         forwardIsPossible = false; //can't go forward without any moves
         backIsPossible = false;
+        drawUI();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        mWakeLock.release();
     }
 
     @Override
@@ -108,18 +143,35 @@ public class MainActivity extends AppCompatActivity {
             throw new IllegalMoveException(move);
         }
         player_life[offset] += move.getIncrement();
-        move_list.add(move);
+        //check for null move_list
+        if (move_list.size() != 0){
+            if (System.currentTimeMillis() - move_list.get(move_list.size() - 1).getTimestamp() <
+                    MERGE_MILLIS){ //if last command was within merge range
+                float diff = System.currentTimeMillis() - move_list.get(move_list.size() - 1).getTimestamp() / 1000;
+                Log.d("merge", "merging with diff of " + diff + "s");
+                move_list.get(move_list.size() - 1).mergeWithMove(move);
+            } else {
+                move_list.add(move); //TODO fix confusing logic
+            }
+        } else {
+            move_list.add(move);
+        }
     }
 
+    /**
+     * This method should be the last call of controller methods
+     */
     private void drawUI(){
         player_1_life.setText("" + player_life[0]);
         player_2_life.setText("" + player_life[1]);
-        if (move_list.size() == 0){
-            forwardIsPossible = false;
-            backIsPossible = false;
-        } else {
-
-        }
+        backIsPossible = (move_list.size() == 0) ? false : true;
+        forwardIsPossible = (reverted_move_list.size() == 0) ? false : true;
+        int back_button_xml = (backIsPossible) ? View.VISIBLE : View.INVISIBLE;
+        int forward_button_xml = (forwardIsPossible) ? View.VISIBLE : View.INVISIBLE;
+        back_button.setVisibility(back_button_xml);
+        back_button.setClickable(backIsPossible);
+        forward_button.setVisibility(forward_button_xml);
+        forward_button.setClickable(forwardIsPossible);
     }
 
     private void printHistory(){
@@ -135,9 +187,12 @@ public class MainActivity extends AppCompatActivity {
         }
         for (int i = 0; i < player_count; i++){
             if (player_array[i] == move_list.get(move_list.size() - 1).getplayer_enum()){ //if this is the player whose move was reversed
-                player_life[i]+=move_list.get(move_list.size() - 1).getIncrement();
+                player_life[i]-=move_list.get(move_list.size() - 1).getIncrement();
                 //remove last from move_list and add it to reverted move_list
-                reverted_move_list.add(move_list.get(move_list.size() - 1));
+                Toast.makeText(MainActivity.this,
+                        "Undid move" + move_list.get(move_list.size() - 1).toString() ,
+                        Toast.LENGTH_SHORT).show();
+                reverted_move_list.add(new PlayerMove(move_list.get(move_list.size() - 1)));
                 move_list.remove(move_list.size() - 1);
                 break;
             }
@@ -151,7 +206,23 @@ public class MainActivity extends AppCompatActivity {
             Log.wtf("reverted_move_list", "reverted_move_list redo called when null or empty");
             return;
         }
+        for (int i = 0; i < player_count; i++){
+            if (player_array[i] == reverted_move_list.get(i).getplayer_enum()){
+                player_life[i]+=reverted_move_list.get(reverted_move_list.size() - 1).getIncrement();//last item in the list
+                move_list.add(new PlayerMove(reverted_move_list.get(reverted_move_list.size() - 1)));
+                Toast.makeText(MainActivity.this,
+                        "Undid move" + move_list.get(move_list.size() - 1).toString() ,
+                        Toast.LENGTH_SHORT).show();
+                //remove reverted move from list
+                reverted_move_list.remove(reverted_move_list.size() - 1);
+                break;
+            }
+        }
         //drawUI is always the last call
         drawUI();
+    }
+
+    public void onRefreshButtonClick(View v){
+
     }
 }

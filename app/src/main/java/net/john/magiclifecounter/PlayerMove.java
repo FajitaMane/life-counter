@@ -3,17 +3,27 @@ package net.john.magiclifecounter;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import Exceptions.IllegalMoveException;
+
 /**
  * Created by John on 8/21/2015.
  */
 public class PlayerMove {
     private Player player_enum;
     private int increment;
+    long timestamp;
 
 
     public PlayerMove(Player player, int increment){
         this.player_enum = player;
         this.increment = increment;
+        timestamp = System.currentTimeMillis();
+    }
+
+    public PlayerMove(PlayerMove move){
+        this.player_enum = move.getplayer_enum();
+        this.increment = move.getIncrement();
+        timestamp = System.currentTimeMillis();
     }
 /*
     //assume damage is to opposite player in two player game if no affected player provided
@@ -23,6 +33,17 @@ public class PlayerMove {
         this.increment = increment;
     }
     */
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    //called when a move is merged with multiple of the same layer
+    protected void mergeWithMove(PlayerMove move) throws IllegalMoveException {
+        if (this.player_enum != move.getplayer_enum()) throw new IllegalMoveException(move);
+        this.increment += move.getIncrement();
+
+    }
 
     @Nullable
     protected static PlayerMove getMoveFromId(int id){

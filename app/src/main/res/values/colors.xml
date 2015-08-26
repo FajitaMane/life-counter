@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="text_color" type="color">#FFFFFF</item>
+
+    //player life colors
+    <item name="bright_green" type="color">#33ff00</item>
+    <item name="darker_green" type="color">#09ae00</item>
+    <item name="bright_yellow" type="color">#fffb88</item>
+    <item name="dark_yellow" type="color">#aba85a</item>
 </resources>
