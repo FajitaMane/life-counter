@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import Exceptions.IllegalMoveException;
+
 public class MainActivity extends AppCompatActivity {
     private final int STARTING_LIFE = 20;
     private int player_count = 2;
@@ -84,16 +86,29 @@ public class MainActivity extends AppCompatActivity {
             Log.d("move", "move is null");
             return;
         }
-        Log.d("move", move.toString());
-        if (move.getplayer_enum() == Player.PLAYER_ONE){
-            player_life[0]+=move.getIncrement();
-        } else {
-            player_life[1]+=move.getIncrement();
+        try {
+            applyPlayerMove(move); //only makes the move if it's legal
+            drawUI();
+        } catch (IllegalMoveException ex){
+            ex.printStackTrace();
         }
+    }
+
+    private void applyPlayerMove(PlayerMove move) throws IllegalMoveException {
+        int offset = 0;
+        boolean player_found = false;
+        for (int i = 0; i < player_count; i++){
+            if (player_array[i] == move.getplayer_enum()){
+                offset = i;
+                player_found = true;
+            }
+        }
+        if (!player_found) throw new IllegalMoveException(move); //player not found
+        if (player_life[offset] + move.getIncrement() < 0){
+            throw new IllegalMoveException(move);
+        }
+        player_life[offset] += move.getIncrement();
         move_list.add(move);
-        drawUI();
-        //Log.d("Buttons", "after IncrementorClick player 1 life " + player_life[0]);
-        printHistory();
     }
 
     private void drawUI(){

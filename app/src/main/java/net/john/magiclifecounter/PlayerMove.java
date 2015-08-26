@@ -12,7 +12,7 @@ public class PlayerMove {
 
 
     public PlayerMove(Player player, int increment){
-        this.player_enum = player_enum;
+        this.player_enum = player;
         this.increment = increment;
     }
 /*
@@ -26,6 +26,7 @@ public class PlayerMove {
 
     @Nullable
     protected static PlayerMove getMoveFromId(int id){
+        Log.d("move", "getMoveFromId received id " + id);
         switch (id){
             case R.id.player_1_add_one:
                 return new PlayerMove(Player.PLAYER_ONE, 1);
@@ -69,7 +70,7 @@ public class PlayerMove {
 
     @Override
     public String toString(){
-        return " takes " + increment + " damage";
+        return player_enum.name() + " takes " + increment + " damage";
     }
 
     public int getIncrement() {
