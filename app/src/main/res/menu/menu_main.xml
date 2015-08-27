@@ -5,4 +5,6 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/move_history" android:title="Move History"
         app:showAsAction="ifRoom" />
+    <item android:id="@+id/preferences" android:title="Preferences"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -6,4 +6,15 @@
     <string name="player_1_life">20</string>
     <string name="five">5</string>
     <string name="one">1</string>
+
+    <string name="reset_prompt">Start a new game?</string>
+    <string name="confirm_reset">Yes</string>
+    <string name="deny_reset">No</string>
+
+    <!--preference strings -->
+    <string name="num_players_preference">Number of Players</string>
+    <string name="num_players_preference_summary">Choose the desired number of players from the list.</string>
+    <string name="keep_screen_on_preference">Keep Screen On</string>
+    <string name="keep_screen_on_preference_on_summary">Keep the screen on during games.</string>
+    <string name="keep_screen_on_preference_off_summary">Allow the screen from turning off during games.</string>
 </resources>

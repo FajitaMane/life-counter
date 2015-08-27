@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="num_players"
+        android:title="@string/num_players_preference"
+        android:summary="@string/num_players_preference_summary"
+        android:entries="@array/num_players_options"
+        android:entryValues="@array/num_players_options_vals"
+        android:defaultValue="2"/>
+
+    <CheckBoxPreference
+        android:key="keep_screen_on"
+        android:title="@string/keep_screen_on_preference"
+        android:summaryOn="@string/keep_screen_on_preference_on_summary"
+        android:summaryOff="@string/keep_screen_on_preference_off_summary" />
+
+
+</PreferenceScreen>
